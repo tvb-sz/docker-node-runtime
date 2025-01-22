@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    strategy:
+      matrix:
+        nodeVersion: [ "18.8.0" ]
+        include:
+          - nodeVersion: '18.8.0'
+            supportArch: 'linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            name=php:${{ matrix.nodeVersion }}-fpm-alpine
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.supportArch }}
+          push: true
+          tags: nmgsz/docker-node-runtime:${{ matrix.nodeVersion }}-alpine-${{ steps.meta.outputs.version }},nmgsz/docker-node-runtime:${{ matrix.nodeVersion }}-alpine
+          build-args: |
+            nodeVersion=${{ matrix.nodeVersion }}
