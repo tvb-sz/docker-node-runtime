@@ -12,7 +12,7 @@ jobs:
         nodeVersion: [ "18.8.0" ]
         include:
           - nodeVersion: '18.8.0'
-            supportArch: 'linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x'
+            supportArch: 'linux/amd64,linux/arm64/v8'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
