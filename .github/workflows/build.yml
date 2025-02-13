@@ -35,7 +35,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            name=php:${{ matrix.nodeVersion }}-fpm-alpine
+            name=node:${{ matrix.nodeVersion }}-alpine
           tags: |
             type=ref,event=branch
             type=ref,event=pr
